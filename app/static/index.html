@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Course advisor</title>
+  <meta name="description" content="Enter your academic record, choose your courses and see how each one is likely to go.">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <h1>Course advisor</h1>
+    <p class="intro">
+      Enter your academic record, choose the courses you plan to take, and see how each
+      one is likely to go.
+    </p>
+  </header>
+
+  <div id="service-notice" class="notice" role="alert" hidden></div>
+
+  <main class="page">
+    <form id="advisor-form" autocomplete="off">
+      <section class="block" aria-labelledby="record-heading">
+        <h2 id="record-heading">Your record</h2>
+        <div id="record-fields" class="fields"></div>
+
+        <details class="optional">
+          <summary>Add more detail for better predictions</summary>
+          <p class="hint wide">
+            Average score by course area is the strongest clue the model uses. Fill in any area you
+            have already taken courses in. Anything you leave blank falls back to your overall average.
+          </p>
+          <div id="optional-fields" class="fields"></div>
+        </details>
+      </section>
+
+      <section class="block" aria-labelledby="courses-heading">
+        <h2 id="courses-heading">Courses this semester</h2>
+        <div class="field slot-field">
+          <label for="slot">Level and semester</label>
+          <select id="slot" disabled></select>
+        </div>
+        <ul id="course-list" class="courses" aria-label="Courses to include"></ul>
+      </section>
+
+      <div class="actions">
+        <button type="submit" id="submit" disabled>Get advice</button>
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+      </div>
+    </form>
+
+    <section id="results" class="results block" aria-labelledby="results-heading" aria-live="polite">
+      <h2 id="results-heading" tabindex="-1">Your advice</h2>
+      <p class="empty">
+        Your advice will appear here. Choose your courses above, then select Get advice.
+      </p>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

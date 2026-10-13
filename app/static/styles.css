@@ -1,0 +1,401 @@
+/* Course advisor. One idea carries the design: every result is drawn on the
+   same 0 to 100 scale with the grade bands marked, so a prediction reads as a
+   position and a range, not a bare number. */
+
+:root {
+  color-scheme: light dark;
+
+  --ink: #1b2430;
+  --ink-soft: #4a5563;
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --line: #d3dae3;
+  --accent: #1e3a5f;
+  --accent-ink: #ffffff;
+  --focus: #1d4ed8;
+
+  --strong: #17705f;
+  --average: #86580a;
+  --risk: #b3261e;
+  --strong-tint: rgba(23, 112, 95, 0.17);
+  --average-tint: rgba(214, 150, 20, 0.22);
+  --risk-tint: rgba(179, 38, 30, 0.14);
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8ecf1;
+    --ink-soft: #a9b4c2;
+    --bg: #12171d;
+    --panel: #1a2129;
+    --line: #2f3947;
+    --accent: #9cc0ee;
+    --accent-ink: #0f1720;
+    --focus: #8ab4ff;
+
+    --strong: #52c4ab;
+    --average: #e3b04b;
+    --risk: #f08a82;
+    --strong-tint: rgba(82, 196, 171, 0.2);
+    --average-tint: rgba(227, 176, 75, 0.2);
+    --risk-tint: rgba(240, 138, 130, 0.18);
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 1rem/1.55 var(--sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- page frame */
+.masthead,
+.page,
+.notice {
+  max-width: 58rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+.masthead { padding-top: 2.75rem; }
+
+h1, h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.3rem, 6vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+
+h2 { font-size: 1.55rem; line-height: 1.2; }
+
+.intro {
+  max-width: 36rem;
+  margin: 0.9rem 0 0;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+
+.page { padding-bottom: 5rem; }
+
+.block {
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ---- notices */
+.notice {
+  display: block;
+  margin-top: 1.5rem;
+}
+
+.notice[role="alert"]:not([hidden]) {
+  padding: 0.9rem 1.25rem;
+  background: var(--risk-tint);
+  border-radius: 6px;
+  max-width: calc(58rem - 2.5rem);
+}
+
+/* ---- form fields */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+  gap: 1.1rem 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.field input:hover,
+.field select:hover { border-color: var(--ink-soft); }
+
+.hint {
+  margin: 0.3rem 0 0;
+  font-size: 0.83rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.hint.wide { max-width: 40rem; margin-top: 0.9rem; }
+
+.optional {
+  margin-top: 1.6rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--line);
+}
+
+.optional summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.25rem 0;
+}
+
+.slot-field { max-width: 20rem; margin-top: 1.25rem; }
+
+/* ---- course picker */
+.courses {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0.6rem;
+}
+
+.course {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.75rem;
+  align-items: center;
+  height: 100%;
+  padding: 0.65rem 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.course:has(input:checked) { border-color: var(--accent); }
+
+.course input {
+  grid-row: span 2;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.course-code { font-weight: 600; }
+.course-meta { font-size: 0.83rem; color: var(--ink-soft); }
+
+/* ---- submit */
+.actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.75rem 1.6rem;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) { filter: brightness(1.12); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.form-error {
+  margin: 0;
+  color: var(--risk);
+  font-weight: 600;
+  max-width: 40rem;
+}
+
+/* ---- results */
+.empty { margin: 1rem 0 0; color: var(--ink-soft); max-width: 36rem; }
+
+.headline {
+  margin: 1rem 0 0;
+  max-width: 36rem;
+  font-family: var(--serif);
+  font-size: 1.55rem;
+  line-height: 1.35;
+}
+
+.headline strong { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.summary-message { margin: 0.6rem 0 0; max-width: 36rem; color: var(--ink-soft); }
+
+.notes {
+  margin: 1.25rem 0 0;
+  padding: 0.8rem 1rem 0.8rem 2rem;
+  max-width: 44rem;
+  font-size: 0.9rem;
+  background: var(--average-tint);
+  border-radius: 6px;
+}
+
+.notes li + li { margin-top: 0.3rem; }
+
+.scale,
+.row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 12rem) 1fr 8rem;
+  column-gap: 1.5rem;
+}
+
+.scale { margin-top: 2rem; }
+.scale-track { grid-column: 2; }
+
+.zone-names { display: flex; font-size: 0.75rem; color: var(--ink-soft); }
+.zone-names span { text-align: center; }
+
+.ticks {
+  position: relative;
+  height: 1.1rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.tick { position: absolute; top: 0; transform: translateX(-50%); }
+.tick-start { transform: none; }
+.tick-end { transform: translateX(-100%); }
+
+.rows { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+
+.row {
+  grid-template-areas:
+    "who track outcome"
+    "note note note";
+  row-gap: 0.5rem;
+  align-items: center;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.who { grid-area: who; }
+.who-code { display: block; font-weight: 700; font-size: 1.05rem; }
+.who-meta { display: block; font-size: 0.83rem; color: var(--ink-soft); }
+
+.track {
+  grid-area: track;
+  position: relative;
+  display: flex;
+  height: 1.4rem;
+}
+
+.zone { height: 100%; }
+.zone-risk { flex-basis: 50%; background: var(--risk-tint); border-radius: 5px 0 0 5px; }
+.zone-average { flex-basis: 15%; background: var(--average-tint); }
+.zone-strong { flex-basis: 35%; background: var(--strong-tint); border-radius: 0 5px 5px 0; }
+
+.whisker {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 0.65rem;
+  transform: translateY(-50%);
+  background: var(--ink);
+  opacity: 0.22;
+  border-radius: 3px;
+  transition: left 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), width 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.marker {
+  position: absolute;
+  top: -0.3rem;
+  bottom: -0.3rem;
+  left: 0;
+  width: 4px;
+  transform: translateX(-50%);
+  background: var(--ink);
+  border-radius: 2px;
+  transition: left 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.outcome {
+  grid-area: outcome;
+  text-align: right;
+}
+
+.score {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.outcome-detail { display: block; font-size: 0.85rem; font-weight: 600; }
+.outcome-detail::before {
+  content: "";
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.band-at-risk { color: var(--risk); }
+.band-average { color: var(--average); }
+.band-strong { color: var(--strong); }
+
+.note { grid-area: note; max-width: 40rem; font-size: 0.93rem; color: var(--ink-soft); }
+.note p { margin: 0; }
+.note p + p { margin-top: 0.35rem; }
+.note strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.fineprint {
+  margin: 1.5rem 0 0;
+  max-width: 40rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+
+/* ---- small screens */
+@media (max-width: 44rem) {
+  .scale { grid-template-columns: 1fr; }
+  .scale-track { grid-column: 1; }
+
+  .row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "who outcome"
+      "track track"
+      "note note";
+    row-gap: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whisker,
+  .marker { transition: none; }
+}

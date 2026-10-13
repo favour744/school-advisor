@@ -1,0 +1,6 @@
+{
+  "model": "Ridge regression",
+  "mae": 6.644,
+  "rmse": 8.305,
+  "r2": 0.645
+}

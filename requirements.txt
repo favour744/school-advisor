@@ -1,0 +1,9 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+pandas>=2.2,<3
+numpy>=1.26,<2.3
+# Must match the version printed in the Colab notebook (it printed 1.6.1),
+# otherwise loading advisor_model.pkl can fail or silently misbehave.
+scikit-learn==1.6.1
+joblib>=1.4
